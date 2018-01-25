@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -21,42 +20,42 @@ import java.util.List;
 import io.reactivex.Observable;
 
 
-public class FacebookRxSocialLogin implements RxSocialLogin {
+public class FacebookRxLogin implements RxSocialLogin {
 
     private CallbackManager callbackManager;
 
-    public FacebookRxSocialLogin() {
+    public FacebookRxLogin() {
         callbackManager = CallbackManager.Factory.create();
     }
 
     @Override
-    public Observable<LoginResult> login(@NonNull Activity activityInstance, @NonNull List<String> permissions) {
-        LoginManager loginManager = LoginManager.getInstance();
-        Observable<LoginResult> observable = Observable.create(subscriber ->
-                loginManager.registerCallback(callbackManager,
-                        new FacebookCallback<LoginResult>() {
-                            @Override
-                            public void onSuccess(LoginResult loginResult) {
-                                subscriber.onNext(loginResult);
-                            }
+    public Observable<LoginResultData> login(@NonNull Activity activityInstance, @NonNull List<String> permissions) {
+        return Observable.create(subscriber -> {
+            LoginManager loginManager = LoginManager.getInstance();
 
-                            @Override
-                            public void onCancel() {
-                                subscriber.onError(new NullPointerException());
-                            }
+            loginManager.registerCallback(callbackManager,
+                    new FacebookCallback<LoginResult>() {
+                        @Override
+                        public void onSuccess(LoginResult loginResult) {
+                            subscriber.onNext(new LoginResultData(loginResult));
+                        }
 
-                            @Override
-                            public void onError(FacebookException exception) {
-                                subscriber.onError(exception);
-                            }
-                        }));
+                        @Override
+                        public void onCancel() {
+                            subscriber.onError(new NullPointerException());
+                        }
+
+                        @Override
+                        public void onError(FacebookException exception) {
+                            subscriber.onError(exception);
+                        }
+                    });
 
 
-        loginManager.logInWithReadPermissions(
-                activityInstance,
-                permissions);
-
-        return observable;
+            loginManager.logInWithReadPermissions(
+                    activityInstance,
+                    permissions);
+        });
     }
 
     @Override
@@ -65,10 +64,10 @@ public class FacebookRxSocialLogin implements RxSocialLogin {
     }
 
     @Override
-    public Observable<String> getUserData(@NonNull AccessToken accessToken) {
-        Observable<String> observable = Observable.create(subscriber -> {
+    public Observable<String> getUserData(@NonNull LoginResultData loginResultData) {
+        return Observable.create(subscriber -> {
             GraphRequest request = GraphRequest.newMeRequest(
-                    accessToken,
+                    loginResultData.getFacebookLoginResult().getAccessToken(),
                     (object, response) -> {
                         try {
                             String email = object.getString("email");
@@ -78,7 +77,7 @@ public class FacebookRxSocialLogin implements RxSocialLogin {
                             String picture = object.getString("picture");
 
                             String info = email + "\n" + name + "\n" + birthday +
-                                    "\n" + gender;
+                                    "\n" + gender + "\n" + loginResultData.getFacebookLoginResult().getAccessToken().getToken();
 
                             subscriber.onNext(info);
                         } catch (JSONException e) {
@@ -91,8 +90,6 @@ public class FacebookRxSocialLogin implements RxSocialLogin {
             request.setParameters(parameters);
             request.executeAndWait();
         });
-
-        return observable;
     }
 
     @Override

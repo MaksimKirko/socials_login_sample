@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "513493999679",
+    "project_id": "socials-login-sample"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:513493999679:android:1d8aa1aeac4f8cd2",
+        "android_client_info": {
+          "package_name": "com.github.maksimkirko.socials_login_sample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "513493999679-6ufiol5tfhcgs0gsn2euis0g5oo9ndtd.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "513493999679-09mkotu97eqpcbkbg9b1df0c9nmugo7v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.github.maksimkirko.socials_login_sample",
+            "certificate_hash": "3fa1fac7bf81cb19e8c567e733008b4c0ae19c9e"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2Ou4Wx1uIJ5NIsYqiAYqDihew6mRvqK0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

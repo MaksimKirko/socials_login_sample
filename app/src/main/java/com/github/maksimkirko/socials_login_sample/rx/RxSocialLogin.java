@@ -14,11 +14,11 @@ import io.reactivex.Observable;
 
 public interface RxSocialLogin {
 
-    Observable<LoginResult> login(@NonNull Activity activityInstance, @NonNull List<String> permissions);
+    Observable<LoginResultData> login(@NonNull Activity activityInstance, @NonNull List<String> permissions);
 
     Observable<String> logout();
 
-    Observable<String> getUserData(@NonNull AccessToken accessToken);
+    Observable<String> getUserData(@NonNull LoginResultData loginResultData);
 
     void onActivityResult(int requestCode, int resultCode, Intent data);
 }
