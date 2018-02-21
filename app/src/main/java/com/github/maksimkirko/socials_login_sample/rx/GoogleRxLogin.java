@@ -7,7 +7,9 @@ import android.support.annotation.NonNull;
 
 import com.github.maksimkirko.socials_login_sample.R;
 import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -21,31 +23,25 @@ public class GoogleRxLogin implements RxSocialLogin {
 
     public static final int RC_SIGN_IN = 007;
 
-    private GoogleApiClient mGoogleApiClient;
+    private GoogleSignInClient googleSignInClient;
+    private GoogleSignInOptions gso;
 
     public GoogleRxLogin(@NonNull Activity activityInstance) {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(activityInstance.getString(R.string.default_web_client_id))
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .build();
-
-        mGoogleApiClient = new GoogleApiClient.Builder(activityInstance)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .requestIdToken(activityInstance.getString(R.string.server_client_id))
                 .build();
     }
 
     @Override
     public Observable<LoginResultData> login(@NonNull Activity activityInstance, @NonNull List<String> permissions) {
+        if (googleSignInClient == null) {
+            googleSignInClient = GoogleSignIn.getClient(activityInstance, gso);
+        }
+
         return Observable.create(subscriber -> {
-            OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-            if (opr.isDone()) {
-                GoogleSignInResult result = opr.get();
-                subscriber.onNext(new LoginResultData(result));
-            } else {
-                opr.setResultCallback(googleSignInResult -> subscriber.onNext(new LoginResultData(googleSignInResult)));
-                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-                activityInstance.startActivityForResult(signInIntent, RC_SIGN_IN);
-            }
+            Intent signInIntent = googleSignInClient.getSignInIntent();
+            activityInstance.startActivityForResult(signInIntent, RC_SIGN_IN);
         });
     }
 
@@ -62,9 +58,10 @@ public class GoogleRxLogin implements RxSocialLogin {
         if (acct != null) {
             String personName = acct.getDisplayName();
             String email = acct.getEmail();
+            String id = acct.getId();
             String token = acct.getIdToken();
 
-            info = personName + "\n" + email + "\n" + token;
+            info = personName + "\n" + id + "\n" + email + "\n" + token;
         }
         return Observable.just(info);
     }

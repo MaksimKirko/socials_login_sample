@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -11,8 +12,10 @@ import com.github.maksimkirko.socials_login_sample.rx.FacebookRxLogin;
 import com.github.maksimkirko.socials_login_sample.rx.GoogleRxLogin;
 import com.github.maksimkirko.socials_login_sample.rx.LoginResultData;
 import com.github.maksimkirko.socials_login_sample.rx.RxSocialLogin;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
 
 import java.util.Arrays;
 import java.util.List;
@@ -58,29 +61,47 @@ public class MainActivity extends Activity {
         googleRxLoginButton.setOnClickListener(v -> googleSocialLogin.login(this, permissions)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::getDataFromGoogleResults, throwable -> textView.setText(throwable.getClass().getSimpleName())));
+                .subscribe(loginResultData -> {
+                }, throwable -> textView.setText(throwable.getClass().getSimpleName())));
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // TODO remove this to GoogleRxLogin.onActivityResult()
         if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            getDataFromGoogleResults(new LoginResultData(result));
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleSignInResult(task);
         }
+
+
         facebookSocialLogin.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void getDataFromFacebookResults(@NonNull LoginResultData loginResultData) {
-        facebookSocialLogin.getUserData(loginResultData)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(s -> textView.setText(s), throwable -> textView.setText(throwable.getClass().getSimpleName()));
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+
+            String personName = account.getDisplayName();
+            String email = account.getEmail();
+            String id = account.getId();
+            String token = account.getIdToken();
+            String picture = account.getPhotoUrl().toString();
+
+            String info = personName + "\n" + id + "\n" + email + "\n" + token + "\n" + picture;
+
+            Log.e("user", info);
+            // Signed in successfully, show authenticated UI.
+
+        } catch (ApiException e) {
+            // The ApiException status code indicates the detailed failure reason.
+            // Please refer to the GoogleSignInStatusCodes class reference for more information.
+            Log.e("error", "signInResult:failed code=" + e.getStatusCode());
+        }
     }
 
-    private void getDataFromGoogleResults(@NonNull LoginResultData loginResultData) {
-        googleSocialLogin.getUserData(loginResultData)
+    private void getDataFromFacebookResults(@NonNull LoginResultData loginResultData) {
+        facebookSocialLogin.getUserData(loginResultData)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(s -> textView.setText(s), throwable -> textView.setText(throwable.getClass().getSimpleName()));

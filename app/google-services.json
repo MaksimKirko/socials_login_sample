@@ -1,7 +1,9 @@
 {
   "project_info": {
     "project_number": "513493999679",
-    "project_id": "socials-login-sample"
+    "firebase_url": "https://socials-login-sample.firebaseio.com",
+    "project_id": "socials-login-sample",
+    "storage_bucket": "socials-login-sample.appspot.com"
   },
   "client": [
     {
@@ -12,6 +14,10 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "513493999679-mtj69vbi8i4ejekit8q2au0l384fp5sl.apps.googleusercontent.com",
+          "client_type": 3
+        },
         {
           "client_id": "513493999679-6ufiol5tfhcgs0gsn2euis0g5oo9ndtd.apps.googleusercontent.com",
           "client_type": 3
@@ -35,11 +41,16 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "513493999679-mtj69vbi8i4ejekit8q2au0l384fp5sl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     }
